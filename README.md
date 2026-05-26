@@ -1,5 +1,4 @@
-Markdown
-# 🇬🇧 Hệ thống Ngân hàng Câu hỏi & Thi Trực Tuyến Ngoại Ngữ
+# Hệ thống Ngân hàng Câu hỏi & Thi Trực Tuyến Ngoại Ngữ
 
 Dự án xây dựng website thi thử tiếng Anh (TOEIC/IELTS/VSTEP) sử dụng kiến trúc **Decoupled (SPA)** với Frontend bằng **React** và Backend bằng **Node.js + Express + PostgreSQL**.
 
@@ -67,7 +66,7 @@ Dự án xây dựng website thi thử tiếng Anh (TOEIC/IELTS/VSTEP) sử dụ
    cd server
     ```
 2. Khởi chạy Server ở chế độ Phát triển (Development):
-```bash
-npm run dev
-```
+    ```bash
+    npm run dev
+    ```
 3. Server sẽ chạy tại: http://localhost:5000 và tự động kết nối tới Cloud Database.   

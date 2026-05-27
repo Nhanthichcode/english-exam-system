@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 5000;
 
 const authRoutes = require('./router/authRoutes');
 const questionRoutes = require('./router/questionRoutes');
+const examRoutes = require('./router/examRoutes');
 
 // Cấu hình Middlewares
 app.use(cors({
@@ -23,6 +24,7 @@ app.use(cookieParser());
 // Sử dụng các route đã định nghĩa
 app.use('/api/auth', authRoutes);
 app.use('/api/questions', questionRoutes);
+app.use('/api/exams', examRoutes);
 
 // Khởi chạy server
 app.listen(PORT, () => {

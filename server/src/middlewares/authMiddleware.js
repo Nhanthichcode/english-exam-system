@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const authMiddleware = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    console.log('Token nhận được từ client:', token);
+    
 if(!token){
     return res.status(401).json({ message: 'Không tìm thấy quyền truy cập' });
 }

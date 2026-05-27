@@ -31,7 +31,7 @@ Dự án xây dựng website thi thử tiếng Anh (TOEIC/IELTS/VSTEP) sử dụ
 
 ### ⬜ PHẦN 3: CÁC API QUẢN LÝ ĐỀ THI & CÂU HỎI (Chưa thực hiện)
 - [x] Thiết kế API Quản lý câu hỏi (Thêm, Sửa, Xóa, Nhóm câu hỏi kèm Audio/Hình ảnh)[cite: 4, 20, 22].
-- [ ] Thiết kế API Quản lý đề thi và cấu trúc Part Template[cite: 5, 19, 23, 24].
+- [x] Thiết kế API Quản lý đề thi và cấu trúc Part Template[cite: 5, 19, 23, 24].
 
 ### ⬜ PHẦN 4: API LÀM BÀI THI & CHẤM ĐIỂM (Chưa thực hiện)
 - [ ] API lấy đề thi (Bảo mật: Tự động ẩn đáp án đúng trước khi gửi về client)[cite: 7, 22, 25].

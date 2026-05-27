@@ -27,10 +27,10 @@ Dự án xây dựng website thi thử tiếng Anh (TOEIC/IELTS/VSTEP) sử dụ
   - Tạo bộ đôi **Access Token** (lưu ở bộ nhớ tạm Frontend) và **Refresh Token** (lưu an toàn trong `HttpOnly Cookie`)[cite: 15].
 - [x] **Bước 3.3:** Viết API **Refresh Token** (`POST /api/auth/refresh`) để tự động duy trì phiên đăng nhập khi Access Token hết hạn[cite: 10, 15].
 - [x] **Bước 3.4:** Viết API **Đăng xuất** (`POST /api/auth/logout`) xóa cookie và hủy token trong DB[cite: 10, 15].
-- [ ] **Bước 3.5:** Viết Middleware xác thực người dùng (`authMiddleware`) và phân quyền (`checkRole`)[cite: 12].
+- [x] **Bước 3.5:** Viết Middleware xác thực người dùng (`authMiddleware`) và phân quyền (`checkRole`)[cite: 12].
 
 ### ⬜ PHẦN 3: CÁC API QUẢN LÝ ĐỀ THI & CÂU HỎI (Chưa thực hiện)
-- [ ] Thiết kế API Quản lý câu hỏi (Thêm, Sửa, Xóa, Nhóm câu hỏi kèm Audio/Hình ảnh)[cite: 4, 20, 22].
+- [x] Thiết kế API Quản lý câu hỏi (Thêm, Sửa, Xóa, Nhóm câu hỏi kèm Audio/Hình ảnh)[cite: 4, 20, 22].
 - [ ] Thiết kế API Quản lý đề thi và cấu trúc Part Template[cite: 5, 19, 23, 24].
 
 ### ⬜ PHẦN 4: API LÀM BÀI THI & CHẤM ĐIỂM (Chưa thực hiện)

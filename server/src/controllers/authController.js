@@ -6,7 +6,7 @@ const db = require("../config/db");
 
 const generateToken = (user) => {
     return jwt.sign(
-        { id: user.id, email: user.email, role_id: user.role_id },
+        { id: user.id, full_name: user.full_name, email: user.email, role_id: user.role_id },
         process.env.JWT_ACCESS_SECRET,
         { expiresIn: "1h" },
     );
@@ -36,7 +36,7 @@ exports.register = async (req, res) => {
 
         // Tạo token JWT
         const token = jwt.sign(
-            { id: newUser.id, email: newUser.email, role_id: newUser.role_id },
+            { id: newUser.id, full_name: newUser.full_name, email: newUser.email, role_id: newUser.role_id },
             process.env.JWT_ACCESS_SECRET,
             { expiresIn: "1h" },
         );
@@ -96,6 +96,25 @@ exports.login = async (req, res) => {
     }
 };
 
+exports.getProfile = async (req, res) => {
+    try {
+        // req.user hiện tại đã có đầy đủ thông tin giải mã từ Token mới
+        return res.status(200).json({
+            message: "Chào mừng bạn đến với khu vực tài khoản cá nhân",
+            user_data: {
+                id: req.user.id,
+                email: req.user.email,
+                role_id: req.user.role_id,
+                full_name: req.user.full_name,
+                iat: req.user.iat,
+                exp: req.user.exp
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Lỗi hệ thống!" });
+    }
+};
+
 exports.logout = async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
@@ -138,7 +157,7 @@ exports.refreshToken = async (req, res) => {
             }
 
             // 5. Lấy lại thông tin user để đóng gói vào Access Token mới
-            const userQuery = await db.query('SELECT id, email, role_id FROM users WHERE id = $1', [decoded.id]);
+            const userQuery = await db.query('SELECT id, email, full_name, role_id FROM users WHERE id = $1', [decoded.id]);
             const user = userQuery.rows[0];
 
             if (!user) {
@@ -147,7 +166,7 @@ exports.refreshToken = async (req, res) => {
 
             // 6. Cấp Access Token mới
             const newAccessToken = jwt.sign(
-                { id: user.id, email: user.email, role_id: user.role_id },
+                { id: user.id, email: user.email, full_name: user.full_name, role_id: user.role_id },
                 process.env.JWT_ACCESS_SECRET,
                 { expiresIn: '15m' }
             );

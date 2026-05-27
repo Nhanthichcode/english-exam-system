@@ -36,7 +36,7 @@ Dự án xây dựng website thi thử tiếng Anh (TOEIC/IELTS/VSTEP) sử dụ
 ### ⬜ PHẦN 4: API LÀM BÀI THI & CHẤM ĐIỂM (Chưa thực hiện)
 - [x] API lấy đề thi (Bảo mật: Tự động ẩn đáp án đúng trước khi gửi về client)[cite: 7, 22, 25].
 - [x] API Auto-save tiến trình làm bài dạng JSONB[cite: 7, 26].
-- [ ] API Nộp bài và logic chấm điểm tự động từ Server[cite: 7, 26, 27].
+- [x] API Nộp bài và logic chấm điểm tự động từ Server[cite: 7, 26, 27].
 
 ### ⬜ PHẦN 5: XÂY DỰNG GIAO DIỆN FRONTEND REACT (Chưa thực hiện)
 - [ ] Khởi tạo React project với Tailwind CSS.

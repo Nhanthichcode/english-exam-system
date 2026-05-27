@@ -9,6 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const authRoutes = require('./router/authRoutes');
+const questionRoutes = require('./router/questionRoutes');
 
 // Cấu hình Middlewares
 app.use(cors({
@@ -19,13 +20,9 @@ app.use(express.json()); // Cho phép Express đọc dữ liệu dạng JSON t�
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Route test kiểm tra server hoạt động
-app.get('/api/test', (req, res) => {
-    res.json({ message: "Backend Node.js + Express đã sẵn sàng!" });
-});
-
 // Sử dụng các route đã định nghĩa
 app.use('/api/auth', authRoutes);
+app.use('/api/questions', questionRoutes);
 
 // Khởi chạy server
 app.listen(PORT, () => {

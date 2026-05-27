@@ -1,11 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+
 require('dotenv').config();
 
 const db = require('./config/db');
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+const authRoutes = require('./router/authRoutes');
 
 // Cấu hình Middlewares
 app.use(cors({
@@ -20,6 +23,9 @@ app.use(cookieParser());
 app.get('/api/test', (req, res) => {
     res.json({ message: "Backend Node.js + Express đã sẵn sàng!" });
 });
+
+// Sử dụng các route đã định nghĩa
+app.use('/api/auth', authRoutes);
 
 // Khởi chạy server
 app.listen(PORT, () => {

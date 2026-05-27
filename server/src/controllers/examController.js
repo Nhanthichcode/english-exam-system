@@ -83,3 +83,109 @@ exports.autoSaveProgress = async (req, res) => {
     }
 
 };
+
+exports.submitExamAndGrade = async (req, res) => {
+    try {
+        const { attempt_id, answers } = req.body; // answers dạng object: {"1": "A", "2": "C"} (Key là question_id, Value là đáp án chọn)
+
+        if (!attempt_id || !answers) {
+            return res.status(400).json({ message: "Thiếu mã lượt thi hoặc danh sách đáp án bài làm!" });
+        }
+
+        // 1. Kiểm tra trạng thái lượt thi hiện tại xem có hợp lệ (đang làm) không
+        const attemptCheck = await db.query(
+            'SELECT exam_id, status FROM exam_attempts WHERE id = $1', 
+            [attempt_id]
+        );
+        
+        if (attemptCheck.rows.length === 0) {
+            return res.status(404).json({ message: "Không tìm thấy lượt thi này!" });
+        }
+        if (attemptCheck.rows[0].status === 'completed') {
+            return res.status(400).json({ message: "Bài thi này đã được nộp và chấm điểm trước đó!" });
+        }
+
+        const examId = attemptCheck.rows[0].exam_id;
+
+        // 2. Lấy danh sách đáp án ĐÚNG và ĐIỂM SỐ của từng câu hỏi thuộc đề thi này trực tiếp từ DB
+        const correctAnswersQuery = `
+            SELECT q.id as question_id, q.correct_answer, eq.score
+            FROM exam_questions eq
+            JOIN questions q ON eq.question_id = q.id
+            JOIN exam_sections es ON eq.exam_section_id = es.id
+            WHERE es.exam_id = $1
+        `;
+        const correctAnswersResult = await db.query(correctAnswersQuery, [examId]);
+        const correctQuestions = correctAnswersResult.rows;
+
+        // 3. Khởi tạo các biến tính toán kết quả
+        let totalScore = 0;
+        let totalCorrect = 0;
+        let totalQuestions = correctQuestions.length;
+        const detailedResults = []; // Lưu chi tiết để trả về báo cáo dạng: câu này đúng hay sai, đáp án nào đúng
+
+        // 4. Thuật toán so khớp đáp án
+        correctQuestions.forEach(q => {
+            const questionIdStr = q.question_id.toString();
+            const studentAnswer = answers[questionIdStr] || null; // Đáp án học sinh chọn (nếu bỏ trống thì mặc định null)
+            
+            // Trường correct_answer lưu dạng JSON trong DB, ví dụ: {"key": "A"}
+            const correctAnswerKey = q.correct_answer?.key; 
+
+            const isCorrect = (studentAnswer !== null && studentAnswer.trim().toUpperCase() === correctAnswerKey.trim().toUpperCase());
+
+            if (isCorrect) {
+                totalCorrect++;
+                totalScore += parseFloat(q.score); // Cộng điểm của câu đó vào tổng điểm
+            }
+
+            // Đóng gói thông tin chi tiết từng câu để lưu lịch sử làm bài bài bản
+            detailedResults.push({
+                question_id: q.question_id,
+                student_answer: studentAnswer,
+                correct_answer: correctAnswerKey,
+                is_correct: isCorrect,
+                score_earned: isCorrect ? parseFloat(q.score) : 0
+            });
+        });
+
+        // 5. Cập nhật kết quả chấm điểm vào bảng exam_attempts trong Database
+        const updateAttemptQuery = `
+            UPDATE exam_attempts
+            SET 
+                end_time = NOW(),
+                status = 'completed',
+                score = $1,
+                current_progress = $2 -- Lưu lại toàn bộ mảng đáp án cuối cùng
+            WHERE id = $3
+            RETURNING id, start_time, end_time
+        `;
+        
+        const updateResult = await db.query(updateAttemptQuery, [
+            totalScore, 
+            JSON.stringify(answers), 
+            attempt_id
+        ]);
+
+        const attemptInfo = updateResult.rows[0];
+
+        // 6. Trả về kết quả trực quan cho Thí sinh xem điểm ngay lập tức
+        return res.status(200).json({
+            message: "Nộp bài thi và chấm điểm thành công!",
+            summary: {
+                attempt_id: attemptInfo.id,
+                total_questions: totalQuestions,
+                correct_answers: totalCorrect,
+                wrong_answers: totalQuestions - totalCorrect,
+                final_score: totalScore,
+                start_time: attemptInfo.start_time,
+                end_time: attemptInfo.end_time
+            },
+            detailed_report: detailedResults // Chi tiết từng câu đúng sai phục vụ tính năng "Xem giải thích đáp án"
+        });
+
+    } catch (error) {
+        console.error("Lỗi xử lý nộp bài và chấm điểm:", error.message);
+        return res.status(500).json({ message: "Lỗi hệ thống khi xử lý chấm điểm!" });
+    }
+};

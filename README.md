@@ -34,8 +34,8 @@ Dự án xây dựng website thi thử tiếng Anh (TOEIC/IELTS/VSTEP) sử dụ
 - [x] Thiết kế API Quản lý đề thi và cấu trúc Part Template[cite: 5, 19, 23, 24].
 
 ### ⬜ PHẦN 4: API LÀM BÀI THI & CHẤM ĐIỂM (Chưa thực hiện)
-- [ ] API lấy đề thi (Bảo mật: Tự động ẩn đáp án đúng trước khi gửi về client)[cite: 7, 22, 25].
-- [ ] API Auto-save tiến trình làm bài dạng JSONB[cite: 7, 26].
+- [x] API lấy đề thi (Bảo mật: Tự động ẩn đáp án đúng trước khi gửi về client)[cite: 7, 22, 25].
+- [x] API Auto-save tiến trình làm bài dạng JSONB[cite: 7, 26].
 - [ ] API Nộp bài và logic chấm điểm tự động từ Server[cite: 7, 26, 27].
 
 ### ⬜ PHẦN 5: XÂY DỰNG GIAO DIỆN FRONTEND REACT (Chưa thực hiện)

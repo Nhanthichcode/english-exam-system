@@ -16,12 +16,7 @@ router.post('/logout', authController.logout);
 router.post('/refreshtoken', authController.refreshToken);
 
 // 1. Trang cá nhân học viên: Bất kỳ ai đăng nhập thành công cũng vào được (role_id nào cũng được)
-router.get('/profile', authMiddleware, (req, res) => {
-    res.json({
-        message: "Chào mừng bạn đến với khu vực tài khoản cá nhân!",
-        user_data: req.user // Hiển thị dữ liệu đã được bóc tách từ Token
-    });
-});
+router.get('/profile', authMiddleware, authController.getProfile);
 
 // 2. Khu vực quản trị: Chỉ cho phép tài khoản Admin (role_id = 1) được truy cập
 router.get('/admin-only', authMiddleware, checkRole([1]), (req, res) => {

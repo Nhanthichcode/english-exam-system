@@ -39,9 +39,9 @@ Dự án xây dựng website thi thử tiếng Anh (TOEIC/IELTS/VSTEP) sử dụ
 - [x] API Nộp bài và logic chấm điểm tự động từ Server[cite: 7, 26, 27].
 
 ### ⬜ PHẦN 5: XÂY DỰNG GIAO DIỆN FRONTEND REACT (Chưa thực hiện)
-- [ ] Khởi tạo React project với Tailwind CSS.
-- [ ] Làm giao diện Đăng ký / Đăng nhập (Quản lý State token)[cite: 10].
-- [ ] Làm giao diện Dashboard cho học viên và phòng thi trực tuyến (Đồng hồ đếm ngược, danh sách câu hỏi)[cite: 7].
+- [x] Khởi tạo React project với Tailwind CSS.
+- [x] Làm giao diện Đăng ký / Đăng nhập (Quản lý State token)[cite: 10].
+- [x] Làm giao diện Dashboard cho học viên và phòng thi trực tuyến (Đồng hồ đếm ngược, danh sách câu hỏi)[cite: 7].
 
 ---
 

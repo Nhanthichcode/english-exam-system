@@ -19,14 +19,14 @@ Dự án xây dựng website thi thử tiếng Anh (TOEIC/IELTS/VSTEP) sử dụ
 - [x] **Bước 2.4:** Kết nối thành công ứng dụng Node.js tới PostgreSQL thông qua thư viện `pg` (Pool) hỗ trợ cấu hình SSL.
 
 ### 🟨 PHẦN 2: XÂY DỰNG AUTHENTICATION API (Đang thực hiện ⏳)
-- [ ] **Bước 3.1:** Viết Router và Controller cho chức năng **Đăng ký tài khoản** (`POST /api/auth/register`)[cite: 10].
+- [x] **Bước 3.1:** Viết Router và Controller cho chức năng **Đăng ký tài khoản** (`POST /api/auth/register`)[cite: 10].
   - Mã hóa mật khẩu bằng `bcryptjs`[cite: 12].
   - Mặc định gán `role_id = 3` (Student)[cite: 12].
-- [ ] **Bước 3.2:** Viết API **Đăng nhập** (`POST /api/auth/login`)[cite: 10].
+- [x] **Bước 3.2:** Viết API **Đăng nhập** (`POST /api/auth/login`)[cite: 10].
   - Xác thực mật khẩu[cite: 12].
   - Tạo bộ đôi **Access Token** (lưu ở bộ nhớ tạm Frontend) và **Refresh Token** (lưu an toàn trong `HttpOnly Cookie`)[cite: 15].
-- [ ] **Bước 3.3:** Viết API **Refresh Token** (`POST /api/auth/refresh`) để tự động duy trì phiên đăng nhập khi Access Token hết hạn[cite: 10, 15].
-- [ ] **Bước 3.4:** Viết API **Đăng xuất** (`POST /api/auth/logout`) xóa cookie và hủy token trong DB[cite: 10, 15].
+- [x] **Bước 3.3:** Viết API **Refresh Token** (`POST /api/auth/refresh`) để tự động duy trì phiên đăng nhập khi Access Token hết hạn[cite: 10, 15].
+- [x] **Bước 3.4:** Viết API **Đăng xuất** (`POST /api/auth/logout`) xóa cookie và hủy token trong DB[cite: 10, 15].
 - [ ] **Bước 3.5:** Viết Middleware xác thực người dùng (`authMiddleware`) và phân quyền (`checkRole`)[cite: 12].
 
 ### ⬜ PHẦN 3: CÁC API QUẢN LÝ ĐỀ THI & CÂU HỎI (Chưa thực hiện)

@@ -26,52 +26,17 @@ exports.createFullQuestionGroup = async (req, res) => {
             saveQuetions.push(saveQuestion);
         }
 
-        return res.status(201).json({ message: 'Nhóm câu hỏi và các câu hỏi đã được tạo thành công!',
+        return res.status(201).json({
+            message: 'Nhóm câu hỏi và các câu hỏi đã được tạo thành công!',
             group: newGroup,
-            questions: saveQuetions });
+            questions: saveQuetions
+        });
     } catch (error) {
         console.error('Lỗi tạo nhóm câu hỏi:', error);
         return res.status(500).json({ message: 'Lỗi hệ thống phía Server!' });
     }
 };
 
-// ================================================================
-// 1. API: THÊM MỘT CÂU HỎI ĐƠN LẺ (Form Fill)
-// ================================================================
-exports.createSingleQuestion = async (req, res) => {
-    try {
-        const { group_id, question_type, question_text, options, correct_answer, explanation, order_in_group } = req.body;
-
-        if (!group_id || !question_type || !options || !correct_answer) {
-            return res.status(400).json({ message: "Vui lòng điền đầy đủ các thông tin bắt buộc (group_id, type, options, correct_answer)!" });
-        }
-
-        const insertQuery = `
-            INSERT INTO questions (group_id, question_type, question_text, options, correct_answer, explanation, order_in_group, created_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-            RETURNING *
-        `;
-        
-        // Lưu ý: options và correct_answer truyền từ Frontend lên dạng Object/JSON, pg sẽ tự động map vào cột JSONB
-        const result = await db.query(insertQuery, [
-            group_id, 
-            question_type, 
-            question_text, 
-            JSON.stringify(options), 
-            JSON.stringify(correct_answer), 
-            explanation, 
-            order_in_group || 1
-        ]);
-
-        return res.status(201).json({
-            message: "Thêm câu hỏi đơn lẻ thành công!",
-            question: result.rows[0]
-        });
-    } catch (error) {
-        console.error("Lỗi thêm câu hỏi đơn lẻ:", error.message);
-        return res.status(500).json({ message: "Lỗi hệ thống khi thêm câu hỏi!" });
-    }
-};
 
 // ================================================================
 // 2. API: IMPORT CÂU HỎI HÀNG LOẠT BẰNG FILE EXCEL
@@ -86,7 +51,7 @@ exports.importQuestionsFromExcel = async (req, res) => {
         const workbook = xlsx.read(file.data, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        
+
         const rawQuestions = xlsx.utils.sheet_to_json(worksheet);
 
         if (rawQuestions.length === 0) {
@@ -153,40 +118,44 @@ exports.importQuestionsFromExcel = async (req, res) => {
 // ================================================================
 // 3. API: SỬA THÔNG TIN CÂU HỎI
 // ================================================================
-exports.updateQuestion = async (req, res) => {
+exports.getQuestionDetail = async (req, res) => {
     try {
         const { id } = req.params;
-        const { question_type, question_text, options, correct_answer, explanation, order_in_group } = req.body;
-
-        if (!question_type || !options || !correct_answer) {
-            return res.status(400).json({ message: "Vui lòng không để trống các thông tin cốt lõi!" });
-        }
 
         const query = `
-            UPDATE questions 
-            SET question_type = $1, question_text = $2, options = $3, correct_answer = $4, explanation = $5, order_in_group = $6
-            WHERE id = $7
-            RETURNING *
+            SELECT 
+                q.id,
+                q.question_text,
+                q.question_type,
+                q.options,
+                q.correct_answer,
+                q.explanation,
+                q.order_in_group,
+                g.id AS group_id,
+                g.title AS group_title,
+                g.audio_url,
+                g.image_url,
+                g.cefr_level_id,
+                g.difficulty,
+                g.group_type_code
+            FROM questions q
+            LEFT JOIN question_groups g ON q.group_id = g.id
+            WHERE q.id = $1
         `;
 
-        const result = await db.query(query, [
-            question_type, 
-            question_text, 
-            JSON.stringify(options), 
-            JSON.stringify(correct_answer), 
-            explanation, 
-            order_in_group, 
-            id
-        ]);
+        const result = await db.query(query, [id]);
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ message: "Không tìm thấy câu hỏi yêu cầu cập nhật!" });
+            return res.status(404).json({ message: "Không tìm thấy câu hỏi yêu cầu!" });
         }
 
-        return res.status(200).json({ message: "Cập nhật câu hỏi thành công!", question: result.rows[0] });
+        return res.status(200).json({
+            message: "Tải thông tin chi tiết câu hỏi thành công!",
+            question: result.rows[0]
+        });
     } catch (error) {
-        console.error("Lỗi sửa câu hỏi:", error.message);
-        return res.status(500).json({ message: "Lỗi hệ thống khi chỉnh sửa câu hỏi!" });
+        console.error("Lỗi khi lấy chi tiết câu hỏi:", error.message);
+        return res.status(500).json({ message: "Lỗi hệ thống khi tải chi tiết câu hỏi!" });
     }
 };
 
@@ -228,18 +197,152 @@ exports.deleteMultipleQuestions = async (req, res) => {
             RETURNING id
         `;
         const result = await db.query(query, [question_ids]);
-const skippedCount = question_ids.length - result.rowCount;
+        const skippedCount = question_ids.length - result.rowCount;
         return res.status(200).json({
             message: "Xóa hàng loạt câu hỏi hoàn tất!",
             summary: {
-                total_requested: question_ids.length,       
-                successfully_deleted: result.rowCount,     
-                skipped_used_questions: skippedCount       
+                total_requested: question_ids.length,
+                successfully_deleted: result.rowCount,
+                skipped_used_questions: skippedCount
             },
             deleted_ids: result.rows.map(row => row.id)
         });
     } catch (error) {
         console.error("Lỗi xóa hàng loạt câu hỏi:", error.message);
         return res.status(500).json({ message: "Lỗi hệ thống khi thực hiện xóa hàng loạt!" });
+    }
+};
+
+exports.getAdminQuestions = async (req, res) => {
+    try {
+        // Truy vấn lấy danh sách câu hỏi, sắp xếp theo ID giảm dần (mới nhất lên đầu)
+        const query = `
+            SELECT id, question_text, question_type, order_in_group 
+            FROM questions 
+            ORDER BY id DESC
+        `;
+        const result = await db.query(query);
+
+        return res.status(200).json({
+            message: "Lấy danh sách câu hỏi quản trị thành công!",
+            questions: result.rows
+        });
+    } catch (error) {
+        console.error("Lỗi lấy danh sách câu hỏi admin:", error.message);
+        return res.status(500).json({ message: "Lỗi hệ thống khi tải danh sách câu hỏi!" });
+    }
+};
+
+// 🚀 API TẠO MỚI CÂU HỎI ĐƠN MỤC TIÊU
+exports.createSingleQuestion = async (req, res) => {
+    try {
+        const { 
+            question_text, options, correct_answer, explanation, order_in_group,
+            title, cefr_level_id, difficulty, group_type_code, audio_url, image_url 
+        } = req.body;
+
+        // Chấp nhận cả 'type' hoặc 'question_type' từ Frontend gửi lên
+        const type = req.body.type || req.body.question_type;
+
+        // Kiểm tra validation nghiêm ngặt theo yêu cầu của hệ thống
+        if (!type || !options || !correct_answer) {
+            return res.status(400).json({ 
+                message: "Vui lòng điền đầy đủ các thông tin bắt buộc (type, options, correct_answer)!" 
+            });
+        }
+
+        // 1. Tự động khởi tạo nhóm câu hỏi (question_groups) trước để lấy group_id
+        const groupResult = await db.query(`
+            INSERT INTO question_groups (group_type_code, title, audio_url, image_url, cefr_level_id, difficulty)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id
+        `, [group_type_code || 'READING_SINGLE', title || null, audio_url || null, image_url || null, cefr_level_id || 1, difficulty || 3]);
+
+        const group_id = groupResult.rows[0].id;
+
+        // 2. Chèn dữ liệu vào bảng questions với group_id vừa sinh ra
+        const questionResult = await db.query(`
+            INSERT INTO questions (group_id, question_type, question_text, options, correct_answer, explanation, order_in_group)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING *
+        `, [
+            group_id, 
+            type, 
+            question_text, 
+            typeof options === 'string' ? options : JSON.stringify(options), 
+            typeof correct_answer === 'object' ? JSON.stringify(correct_answer) : JSON.stringify({ key: correct_answer }), 
+            explanation, 
+            order_in_group || 1
+        ]);
+
+        return res.status(201).json({
+            message: "Tạo câu hỏi thành công!",
+            question: questionResult.rows[0]
+        });
+    } catch (error) {
+        console.error("Lỗi tạo câu hỏi:", error.message);
+        return res.status(500).json({ message: "Lỗi hệ thống không thể khởi tạo câu hỏi!" });
+    }
+};
+
+// 🚀 API CẬP NHẬT CÂU HỎI
+exports.updateQuestion = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {
+            question_text, options, correct_answer, explanation, order_in_group,
+            title, cefr_level_id, difficulty, group_type_code, audio_url, image_url
+        } = req.body;
+
+        const type = req.body.type || req.body.question_type;
+
+        if (!type || !options || !correct_answer) {
+            return res.status(400).json({ 
+                message: "Vui lòng điền đầy đủ các thông tin bắt buộc (type, options, correct_answer)!" 
+            });
+        }
+
+        // Tìm group_id hiện tại của câu hỏi để cập nhật song song vào bảng nhóm câu hỏi
+        const checkQ = await db.query('SELECT group_id FROM questions WHERE id = $1', [id]);
+        if (checkQ.rows.length === 0) {
+            return res.status(404).json({ message: "Không tìm thấy câu hỏi cần chỉnh sửa!" });
+        }
+        const group_id = checkQ.rows[0].group_id;
+
+        // Cập nhật bảng nhóm câu hỏi (question_groups)
+        await db.query(`
+            UPDATE question_groups 
+            SET title = $1, cefr_level_id = $2, difficulty = $3, group_type_code = $4,
+                audio_url = COALESCE($5, audio_url), 
+                image_url = COALESCE($6, image_url)
+            WHERE id = $7
+        `, [title, cefr_level_id, difficulty, group_type_code, audio_url, image_url, group_id]);
+
+        // Cập nhật bảng câu hỏi chính (questions)
+        const updateQuery = `
+            UPDATE questions 
+            SET question_type = $1, question_text = $2, options = $3, 
+                correct_answer = $4, explanation = $5, order_in_group = $6
+            WHERE id = $7
+            RETURNING *
+        `;
+        
+        const updatedResult = await db.query(updateQuery, [
+            type, 
+            question_text, 
+            typeof options === 'string' ? options : JSON.stringify(options), 
+            typeof correct_answer === 'object' ? JSON.stringify(correct_answer) : JSON.stringify({ key: correct_answer }), 
+            explanation, 
+            order_in_group, 
+            id
+        ]);
+
+        return res.status(200).json({
+            message: "Cập nhật thông tin câu hỏi thành công!",
+            question: updatedResult.rows[0]
+        });
+    } catch (error) {
+        console.error("Lỗi cập nhật câu hỏi:", error.message);
+        return res.status(500).json({ message: "Lỗi hệ thống khi cập nhật dữ liệu!" });
     }
 };

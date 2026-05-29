@@ -1,90 +1,81 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import axiosClient from '../api/axiosClient';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-function LoginPage() {
+const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
-        setLoading(true);
 
         try {
-            const response = await axiosClient.post('/auth/login', { email, password });
-            
-            // 1. Lưu Access Token vào localStorage để đính kèm vào các request sau
-            localStorage.setItem('accessToken', response.data.accessToken);
-            // 2. Lưu thông tin user cơ bản để hiển thị lên giao diện
-            localStorage.setItem('userData', JSON.stringify(response.data.user));
+            const response = await axios.post('http://localhost:5000/api/auth/login', {
+                email,
+                password
+            });
 
-            alert('Đăng nhập thành công!');
-            // 3. Điều hướng người dùng sang trang Dashboard học viên
-            navigate('/dashboard');
+            const { accessToken, user } = response.data;
+
+            // 1. Lưu Access Token và thông tin user cơ bản vào LocalStorage/State toàn cục
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('user', JSON.stringify(user));
+
+            // 2. Thuật toán điều hướng phân lớp dựa theo Vai trò (role_id)
+            switch (user.role_id) {
+                case 1:
+                    // Vai trò Admin: Đưa thẳng vào khu quản trị thành viên
+                    navigate('/admin/users');
+                    break;
+                case 2:
+                    // Vai trò Giáo viên: Đưa vào khu quản lý ngân hàng câu hỏi
+                    navigate('/admin/questions');
+                    break;
+                case 3:
+                    // Vai trò Học viên: Đưa ra danh sách đề thi để luyện tập
+                    navigate('/exams');
+                    break;
+                default:
+                    // Trường hợp ngoại lệ không xác định vai trò
+                    navigate('/');
+            }
+
         } catch (err) {
-            setError(err.response?.data?.message || 'Đăng nhập thất bại, vui lòng thử lại!');
-        } finally {
-            setLoading(false);
+            setError(err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại!');
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-            <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-                <h2 className="text-3xl font-black text-center text-indigo-600 mb-2">🇬🇧 CHÀO MỪNG</h2>
-                <p className="text-gray-500 text-center text-sm mb-6">Đăng nhập để tham gia phòng thi trực tuyến</p>
-
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+            <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">Đăng Nhập Hệ Thống</h2>
+                <p className="text-center text-gray-400 text-sm mb-6">Sử dụng tài khoản được cấp để truy cập phân hệ</p>
+                
                 {error && (
-                    <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium">
+                    <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg mb-4 border border-red-100">
                         {error}
                     </div>
                 )}
 
                 <form onSubmit={handleLogin} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">Địa chỉ Email</label>
-                        <input 
-                            type="email" 
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                            placeholder="name@example.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
+                        <label className="block text-xs font-semibold text-gray-500 mb-1">Địa chỉ Email</label>
+                        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="name@example.com" />
                     </div>
-
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">Mật khẩu</label>
-                        <input 
-                            type="password" 
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
+                        <label className="block text-xs font-semibold text-gray-500 mb-1">Mật khẩu</label>
+                        <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="••••••••" />
                     </div>
-
-                    <button 
-                        type="submit" 
-                        disabled={loading}
-                        className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition duration-200 shadow-md text-sm cursor-pointer disabled:bg-indigo-400"
-                    >
-                        {loading ? 'Đang xử lý...' : 'ĐĂNG NHẬP'}
+                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg text-sm transition-all shadow-sm shadow-blue-600/10">
+                        Xác Nhận Đăng Nhập
                     </button>
                 </form>
-
-                <p className="text-sm text-gray-600 text-center mt-6">
-                    Chưa có tài khoản?{' '}
-                    <Link to="/register" className="text-indigo-600 font-bold hover:underline">Đăng ký ngay</Link>
-                </p>
             </div>
         </div>
     );
-}
+};
 
 export default LoginPage;

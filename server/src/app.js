@@ -14,6 +14,7 @@ const questionRoutes = require('./router/questionRoutes');
 const examRoutes = require('./router/examRoutes');
 const adminRoutes = require('./router/adminRoutes');
 const historyRoutes = require('./router/historyRoutes');
+const uploadRoutes = require('./router/uploadRoutes');
 // Cấu hình Middlewares
 app.use(cors({
     origin: 'http://localhost:5173', // URL mặc định của React sau này
@@ -33,6 +34,7 @@ app.use('/api/questions', questionRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/history', historyRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Khởi chạy server
 app.listen(PORT, () => {

@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 exports.getAllUsers = async (req, res) => {
     try {
         const query = `
-            SELECT u.id, u.full_name, u.email, r.role_name, u.created_at 
+            SELECT u.id, u.full_name, u.email, r.name as role_name, u.created_at 
             FROM users u
             JOIN roles r ON u.role_id = r.id
             ORDER BY u.created_at DESC
